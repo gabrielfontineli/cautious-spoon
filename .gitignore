@@ -43,3 +43,15 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+#java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+*.log
+*.ctxt
+*.mtj.tmp/
+/target
