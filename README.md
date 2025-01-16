@@ -10,6 +10,8 @@ Este trabalho consiste na implementação de um sistema bancário simples, onde 
 - Saques de contas
 - Transferências entre contas
 
+## TODO
+
 ### Estrutura do Projeto
 O projeto está organizado da seguinte forma:
 - `src/`: Contém o código fonte do projeto
@@ -25,13 +27,9 @@ O projeto está organizado da seguinte forma:
     ```sh
     cd projeto-banco
     ```
-3. Compile o código:
-    ```sh
-    javac -d bin src/*.java
-    ```
 4. Execute o programa:
     ```sh
-    java -cp bin Main
+    mvn exec:java
     ```
 
 ### Como Executar os Testes
@@ -48,5 +46,3 @@ O projeto está organizado da seguinte forma:
 Gabriel Fontineli
 
 ### Contato
-- Email: gabriel.fontineli@imd.ufrn.br
-- GitHub: [github.com/usuario](https://github.com/usuario)
