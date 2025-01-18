@@ -167,4 +167,15 @@ public class Conta {
                 ", saldo=" + saldo +
                 '}';
     }
+
+    public String[] toCsvRow() {
+        return new String[] {
+            String.valueOf(this.agencia),
+            String.valueOf(this.numeroConta),
+            this.nome,
+            this.cliente.getNome(),
+            this.tipo.name(),
+            String.format("%.2f", this.saldo)
+        };
+    }
 }
