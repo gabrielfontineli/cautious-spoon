@@ -3,8 +3,11 @@ package br.ufrn.bti.banco1000.controller;
 import br.ufrn.bti.banco1000.model.Cliente;
 import br.ufrn.bti.banco1000.model.Conta;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import br.ufrn.bti.banco1000.utils.ExportarCSV;
 
 /**
  * Controller para gerenciar operações bancárias.
@@ -94,5 +97,21 @@ public class ContaController {
      */
     public List<Conta> listarContas() {
         return new ArrayList<>(contas);
+    }
+
+    public void exportarContasCsv(String filePath) {
+        List<String[]> rows = new ArrayList<>();
+
+        for (Conta conta : contas) {
+            rows.add(conta.toCsvRow());
+        }
+
+        try {
+            ExportarCSV.export(filePath, new String[] {
+                "Agência", "Número Conta", "Nome", "Cliente", "Tipo Conta", "Saldo"
+            }, rows);
+        } catch (IOException e) {
+            System.err.println("Erro ao exportar contas para CSV: " + e.getMessage());
+        }
     }
 }
