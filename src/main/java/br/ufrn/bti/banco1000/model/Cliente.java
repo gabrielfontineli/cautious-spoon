@@ -11,10 +11,10 @@ import java.util.List;
  */
 public class Cliente {
     private String nome;
-    private String cpf;
+    private final String cpf;
     private String email;
     private String telefone;
-    private List<Conta> contas;
+    private final List<Conta> contas;
 
     /**
      * Construtor da classe Cliente.

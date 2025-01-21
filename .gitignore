@@ -55,3 +55,4 @@ nbdist/
 *.ctxt
 *.mtj.tmp/
 /target
+data/*

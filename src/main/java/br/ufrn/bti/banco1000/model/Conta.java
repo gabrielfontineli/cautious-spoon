@@ -9,37 +9,36 @@ import java.util.List;
  * Cada conta é associada a um cliente.
  */
 public class Conta {
-    private String nome;
-    private Cliente cliente;
-    private int agencia;
-    private int numeroConta;
-    private TipoConta tipo;
-    private int senha;
+    private final String nome;
+    private final Cliente cliente;
+    private final int agencia;
+    private final int numeroConta;
+    private final TipoConta tipo;
     private double saldo;
-    private List<Movimentacao> movimentacoes;
+    private final List<Movimentacao> movimentacoes;
 
     public enum TipoConta {
-        CORRENTE, POUPANCA
+        CORRENTE, POUPANCA, SALARIO
     }
+
 
     /**
      * Construtor completo da classe Conta.
      *
-     * @param nome Nome da conta.
-     * @param cliente Cliente associado.
-     * @param agencia Número da agência.
+     * @param nome        Nome da conta.
+     * @param cliente     Cliente associado.
+     * @param agencia     Número da agência.
      * @param numeroConta Número único da conta.
-     * @param tipo Tipo da conta (CORRENTE ou POUPANCA).
-     * @param senha Senha da conta.
-     * @param saldo Saldo inicial.
+     * @param tipo        Tipo da conta (CORRENTE ou POUPANCA).
+     * @param saldo       Saldo inicial.
+     * @param v
      */
-    public Conta(String nome, Cliente cliente, int agencia, int numeroConta, TipoConta tipo, int senha, double saldo) {
+    public Conta(String nome, Cliente cliente, int agencia, int numeroConta, TipoConta tipo, double saldo, double v) {
         this.nome = nome;
         this.cliente = cliente;
         this.agencia = agencia;
         this.numeroConta = numeroConta;
         this.tipo = tipo;
-        this.senha = senha;
         this.saldo = saldo;
         this.movimentacoes = new ArrayList<>();
     }

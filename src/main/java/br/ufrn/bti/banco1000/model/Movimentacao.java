@@ -13,7 +13,7 @@ import java.util.Objects;
 public class Movimentacao {
 
     public enum TipoMovimentacao {
-        DEPOSITO, SAQUE, TRANSFERENCIA_ENVIADA, TRANSFERENCIA_RECEBIDA
+        DEPOSITO, SAQUE, TRANSFERENCIA_ENVIADA, TRANSFERENCIA_RECEBIDA, MANUTENCAO, RENDIMENTO
     }
 
     private Date data;
@@ -38,18 +38,9 @@ public class Movimentacao {
         this.valor = valor;
     }
 
-    // Getters e Setters
-    public Date getData() {
-        return data;
-    }
-
     public String getDataFormatada() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         return sdf.format(data);
-    }
-
-    public void setData(Date data) {
-        this.data = data;
     }
 
     public TipoMovimentacao getTipo() {

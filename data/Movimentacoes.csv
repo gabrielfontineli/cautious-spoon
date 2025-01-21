@@ -1,0 +1,5 @@
+tipoMovimentacao,numeroContaCliente,descricao,valor,data
+DEPOSITO,12345,"Depósito inicial",1000.00,"2025-01-01"
+SAQUE,12345,"Saque automático",500.00,"2025-01-02"
+TRANSFERENCIA_ENVIADA,12345,"Transferência para conta 67890",200.00,"2025-01-03"
+TRANSFERENCIA_RECEBIDA,67890,"Transferência recebida da conta 12345",200.00,"2025-01-03"

@@ -1,0 +1,4 @@
+numeroConta,nomeCliente,agencia,tipoConta,saldo,senha
+12345,João Silva,1,CORRENTE,1500.00,1234
+67890,Ana Souza,2,POUPANCA,2000.00,5678
+11121,Carlos Pereira,3,CORRENTE,500.00,9101

@@ -4,12 +4,12 @@ import br.ufrn.bti.banco1000.controller.ClienteController;
 import br.ufrn.bti.banco1000.controller.ContaController;
 import br.ufrn.bti.banco1000.model.Cliente;
 import br.ufrn.bti.banco1000.model.Conta;
-import br.ufrn.bti.banco1000.utils.ExportarCSV;
+import br.ufrn.bti.banco1000.model.Agencia;
+import br.ufrn.bti.banco1000.service.BancoCsv;
+import br.ufrn.bti.banco1000.model.ContaCorrente;
+import br.ufrn.bti.banco1000.model.ContaPoupanca;
+import br.ufrn.bti.banco1000.model.ContaSalario;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -45,7 +45,8 @@ public class BancoGUI {
             System.out.println("5. Realizar Transferência");
             System.out.println("6. Listar Clientes");
             System.out.println("7. Listar Contas");
-            System.out.println("8. Exportar Dados");
+            System.out.println("8. Atualizar dados de agências e contas");
+            System.out.println("9. Exportar dados de agências e contas");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
             int opcao = scanner.nextInt();
@@ -59,7 +60,8 @@ public class BancoGUI {
                 case 5 -> realizarTransferencia(scanner);
                 case 6 -> listarClientes();
                 case 7 -> listarContas();
-                case 8 -> exportar();
+                case 8 -> carregarDadosDoCsv();
+                case 9 -> salvarDadosNoCsv();
                 case 0 -> {
                     System.out.println("Encerrando o sistema. Até logo!");
                     return;
@@ -103,18 +105,55 @@ public class BancoGUI {
         int agencia = scanner.nextInt();
         System.out.print("Número da Conta: ");
         int numeroConta = scanner.nextInt();
-        System.out.print("Tipo da Conta (1 - Corrente, 2 - Poupança): ");
-        int tipo = scanner.nextInt();
         System.out.print("Senha da Conta: ");
         int senha = scanner.nextInt();
         System.out.print("Saldo inicial: ");
         double saldo = scanner.nextDouble();
         scanner.nextLine(); // Consumir quebra de linha
 
-        Conta.TipoConta tipoConta = (tipo == 1) ? Conta.TipoConta.CORRENTE : Conta.TipoConta.POUPANCA;
+        System.out.println("Escolha o tipo de conta:");
+        System.out.println("1. Conta Corrente");
+        System.out.println("2. Conta Poupança");
+        System.out.println("3. Conta Salário");
+        System.out.print("Digite o número da opção: ");
+        int tipoContaEscolhido = scanner.nextInt();
+        scanner.nextLine();
+
+        Conta.TipoConta tipoConta = null;
+        double taxaManutencao = 0;
+        double taxaRendimento = 0;
+        String empregador = "";
+        int limiteSaques = 0;
+
+        switch (tipoContaEscolhido) {
+            case 1:
+                tipoConta = Conta.TipoConta.CORRENTE;
+                System.out.print("Taxa de Manutenção: ");
+                taxaManutencao = scanner.nextDouble();
+                break;
+
+            case 2:
+                tipoConta = Conta.TipoConta.POUPANCA;
+                System.out.print("Taxa de Rendimento: ");
+                taxaRendimento = scanner.nextDouble();
+                break;
+
+            case 3:
+                tipoConta = Conta.TipoConta.SALARIO;
+                scanner.nextLine();
+                System.out.print("Empregador: ");
+                empregador = scanner.nextLine();
+                System.out.print("Limite de Saques Mensais: ");
+                limiteSaques = scanner.nextInt();
+                break;
+
+            default:
+                System.out.println("Opção inválida.");
+                return;
+        }
 
         try {
-            contaController.criarConta(nome, cliente, agencia, numeroConta, tipoConta, senha, saldo);
+            contaController.criarConta(nome, cliente, agencia, numeroConta, tipoConta, senha, saldo, taxaManutencao, taxaRendimento, empregador, limiteSaques);
             System.out.println("Conta criada com sucesso!");
         } catch (IllegalArgumentException e) {
             System.out.println("Erro: " + e.getMessage());
@@ -200,156 +239,24 @@ public class BancoGUI {
 
     private void listarClientes() {
         System.out.println("=== Clientes Cadastrados ===");
-        clienteController.listarClientes().forEach(cliente -> 
+        clienteController.listarClientes().forEach(cliente ->
                 System.out.println("Nome: " + cliente.getNome() + ", CPF: " + cliente.getCpf()));
     }
 
     private void listarContas() {
         System.out.println("=== Contas Cadastradas ===");
-        contaController.listarContas().forEach(conta -> 
+        contaController.listarContas().forEach(conta ->
                 System.out.println("Conta: " + conta.getNumeroConta() + ", Agência: " + conta.getAgencia() +
                         ", Cliente: " + conta.getCliente().getNome() + ", Saldo: " + conta.getSaldo()));
     }
 
-    private void exportar() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("=== Exportar Dados ===");
-        System.out.println("1. Exportar Clientes");
-        System.out.println("2. Exportar Contas");
-        System.out.println("3. Exportar Movimentações");
-        System.out.print("Escolha uma opção: ");
-        int opcao = scanner.nextInt();
-        scanner.nextLine();
-
-        String pastaDestino = "dados_exportados";
-        File pasta = new File(pastaDestino);
-
-        if (!pasta.exists()) {
-            pasta.mkdir(); 
-        }
-
-        String filePath;
-        switch (opcao) {
-            case 1 -> {
-                List<Cliente> clientes = clienteController.listarClientes();
-
-                if(clientes.isEmpty()){
-                    System.out.println("Não há cliente para exportar");
-                    return;
-                }
-
-                filePath = pastaDestino + File.separator + "clientes.csv";
-                exportarClientes(filePath);
-            }
-            case 2 -> {
-                List<Conta> contas = contaController.listarContas();
-
-                if(contas.isEmpty()){
-                    System.out.println("Não há contas para exportar");
-                    return;
-                }
-
-                filePath = pastaDestino + File.separator + "contas.csv";
-                exportarContas(filePath);
-            }
-            case 3 -> {
-                List<String[]> rows = new ArrayList<>();
-                List<Conta> contas = contaController.listarContas();
-
-                for (Conta conta : contas) {
-                    conta.getMovimentacoes().forEach(movimentacao -> {
-                        rows.add(new String[]{
-                                movimentacao.getTipo().name(),
-                                movimentacao.getDescricao(),
-                                String.valueOf(movimentacao.getValor()),
-                                movimentacao.getData().toString(),
-                                conta.getCliente().getNome(),
-                                String.valueOf(conta.getNumeroConta())
-                        });
-                    });
-                }
-
-                if (rows.isEmpty()) {
-                    System.out.println("Não há movimentações para exportar.");
-                    return;
-                }
-
-                filePath = pastaDestino + File.separator + "movimentacoes.csv";
-                exportarMovimentacoes(filePath);
-            }
-            default -> {
-                System.out.println("Opção inválida.");
-                return;
-            }
-        }
-        System.out.println("Dados exportados com sucesso! Arquivo: " + filePath);
+    private void carregarDadosDoCsv() {
+        BancoCsv.carregarDados();
+        System.out.println("Dados de agências e contas atualizados com sucesso!");
     }
 
-
-    private void exportarClientes(String filePath) {
-        List<Cliente> clientes = clienteController.listarClientes();
-        List<String[]> rows = new ArrayList<>();
-
-        for (Cliente cliente : clientes) {
-            rows.add(new String[]{cliente.getNome(), cliente.getCpf(), cliente.getEmail(), cliente.getTelefone()});
-        }
-
-        try {
-            ExportarCSV.export(filePath, new String[]{"Nome", "CPF", "Email", "Telefone"}, rows);
-        } catch (IOException e) {
-            System.out.println("Erro ao exportar clientes: " + e.getMessage());
-        }   
+    private void salvarDadosNoCsv() {
+        BancoCsv.salvarDados();
+        System.out.println("Dados de agências e contas exportados com sucesso!");
     }
-
-    private void exportarContas(String filePath) {
-        List<Conta> contas = contaController.listarContas();
-        List<String[]> rows = new ArrayList<>();
-    
-        for (Conta conta : contas) {
-            rows.add(new String[]{
-                String.valueOf(conta.getAgencia()),
-                String.valueOf(conta.getNumeroConta()),
-                conta.getNome(),
-                conta.getCliente().getNome(),
-                conta.getTipo().name(),
-                String.format("%.2f", conta.getSaldo())
-            });
-        }
-    
-        try {
-            ExportarCSV.export(filePath, new String[]{"Agência", "Número Conta", "Nome", "Cliente", "Tipo Conta", "Saldo"}, rows);
-        } catch (IOException e) {
-            System.out.println("Erro ao exportar contas: " + e.getMessage());
-        }
-    }
-
-    private void exportarMovimentacoes(String filePath) {
-
-        List<String[]> rows = new ArrayList<>();
-        
-        List<Conta> contas = contaController.listarContas();
-        for (Conta conta : contas) {
-
-            conta.getMovimentacoes().forEach(movimentacao -> {
-                rows.add(new String[]{
-                    movimentacao.getTipo().name(),
-                    movimentacao.getDescricao(),                 
-                    String.valueOf(movimentacao.getValor()),     
-                    movimentacao.getData().toString(),          
-                    conta.getCliente().getNome(),               
-                    String.valueOf(conta.getNumeroConta())      
-                });
-            });
-        }
-    
-        String[] headers = {"Tipo", "Descrição", "Valor", "Data", "Cliente", "Conta"};
-    
-        try {
-            ExportarCSV.export(filePath, headers, rows);
-            System.out.println("Movimentações exportadas com sucesso! Arquivo: " + filePath);
-        } catch (IOException e) {
-            System.out.println("Erro ao exportar movimentações: " + e.getMessage());
-        }
-    }
-    
 }

@@ -2,6 +2,9 @@ package br.ufrn.bti.banco1000.controller;
 
 import br.ufrn.bti.banco1000.model.Cliente;
 import br.ufrn.bti.banco1000.model.Conta;
+import br.ufrn.bti.banco1000.model.ContaCorrente;
+import br.ufrn.bti.banco1000.model.ContaPoupanca;
+import br.ufrn.bti.banco1000.model.ContaSalario;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,15 +29,29 @@ public class ContaController {
      * @param cliente Cliente associado.
      * @param agencia Número da agência.
      * @param numeroConta Número único da conta.
-     * @param tipo Tipo da conta (CORRENTE ou POUPANCA).
+     * @param tipo Tipo da conta (CORRENTE, POUPANCA, SALARIO).
      * @param senha Senha da conta.
      * @param saldo Saldo inicial.
+     * @param taxaManutencao (apenas para contas correntes) Taxa de manutenção.
+     * @param taxaRendimento (apenas para contas poupança) Taxa de rendimento.
+     * @param empregador (apenas para contas salário) Empregador associado.
+     * @param limiteSaques (apenas para contas salário) Limite de saques mensais.
      */
-    public void criarConta(String nome, Cliente cliente, int agencia, int numeroConta, Conta.TipoConta tipo, int senha, double saldo) {
-        Conta conta = new Conta(nome, cliente, agencia, numeroConta, tipo, senha, saldo);
+
+    public void criarConta(String nome, Cliente cliente, int agencia, int numeroConta, Conta.TipoConta tipo, int senha, double saldo,
+                           Double taxaManutencao, Double taxaRendimento, String empregador, Integer limiteSaques) {
+        Conta conta = switch (tipo) {
+            case CORRENTE -> new ContaCorrente(nome, cliente, agencia, numeroConta, senha, saldo, taxaManutencao);
+            case POUPANCA -> new ContaPoupanca(nome, cliente, agencia, numeroConta, senha, saldo, taxaRendimento);
+            case SALARIO ->
+                    new ContaSalario(nome, cliente, agencia, numeroConta, senha, saldo, empregador, limiteSaques);
+            default -> new Conta(nome, cliente, agencia, numeroConta, tipo, saldo, saldo);
+        };
+
         contas.add(conta);
         cliente.adicionarConta(conta);
     }
+
 
     /**
      * Busca uma conta pelo número e agência.
