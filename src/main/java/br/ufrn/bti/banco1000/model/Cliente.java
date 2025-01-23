@@ -2,6 +2,7 @@ package br.ufrn.bti.banco1000.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Classe que representa um cliente do sistema bancário.
@@ -87,6 +88,28 @@ public class Cliente {
         // Simples validação de tamanho e formato
         return cpf != null && cpf.matches("\\d{11}");
     }
+
+    public static boolean validarEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+
+        return pattern.matcher(email).matches();
+    }
+
+    public static boolean validarTelefone(String telefone) {
+        String phoneRegex = "^\\+?[0-9. ()-]{7,25}$";
+        Pattern pattern = Pattern.compile(phoneRegex);
+
+        return pattern.matcher(telefone).matches();
+    }
+
+    public static boolean validarNome(String name) {
+        String nameRegex = "^[a-zA-Z\\s]+$";
+        Pattern pattern = Pattern.compile(nameRegex);
+        
+        return name != null && pattern.matcher(name).matches();
+    }
+    
 
     /**
      * Exibe as informações do cliente de forma legível.

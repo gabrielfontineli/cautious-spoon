@@ -1,16 +1,16 @@
 package br.ufrn.bti.banco1000.gui;
 
-import br.ufrn.bti.banco1000.controller.ClienteController;
-import br.ufrn.bti.banco1000.controller.ContaController;
-import br.ufrn.bti.banco1000.model.Cliente;
-import br.ufrn.bti.banco1000.model.Conta;
-import br.ufrn.bti.banco1000.utils.ExportarCSV;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import br.ufrn.bti.banco1000.controller.ClienteController;
+import br.ufrn.bti.banco1000.controller.ContaController;
+import br.ufrn.bti.banco1000.model.Cliente;
+import br.ufrn.bti.banco1000.model.Conta;
+import br.ufrn.bti.banco1000.utils.ExportarCSV;
 
 /**
  * Interface de texto para interação com o sistema bancário.
@@ -24,6 +24,14 @@ public class BancoGUI {
         this.clienteController = new ClienteController();
         this.contaController = new ContaController();
     }
+
+    private boolean ehNumero(String input) {
+        if (input == null || input.isEmpty()) {
+            return false;
+        }
+        return input.matches("\\d+");
+    }
+    
 
     public static void main(String[] args) {
         BancoGUI bancoGUI = new BancoGUI();
@@ -48,9 +56,15 @@ public class BancoGUI {
             System.out.println("8. Exportar Dados");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
-            int opcao = scanner.nextInt();
-            scanner.nextLine(); // Consumir quebra de linha
-
+            String input = scanner.nextLine(); // Consumir quebra de linha ou valor inválido
+            
+            if(!input.matches("\\d+")){
+                System.out.println("Opção inválida.");
+                continue;
+            }
+            
+            int opcao = Integer.parseInt(input);
+            
             switch (opcao) {
                 case 1 -> cadastrarCliente(scanner);
                 case 2 -> criarConta(scanner);
@@ -99,19 +113,55 @@ public class BancoGUI {
 
         System.out.print("Nome da conta: ");
         String nome = scanner.nextLine();
+
         System.out.print("Agência: ");
-        int agencia = scanner.nextInt();
+        String agenciaInput = scanner.nextLine();
+        if (!ehNumero(agenciaInput)) {
+            System.out.println("Agência inválida. Deve conter apenas números.");
+            return;
+        }
+        int agencia = Integer.parseInt(agenciaInput);
+
         System.out.print("Número da Conta: ");
-        int numeroConta = scanner.nextInt();
+        String numeroContaInput = scanner.nextLine();
+        if (!ehNumero(numeroContaInput)) {
+            System.out.println("Número da conta inválido. Deve conter apenas números.");
+            return;
+        }
+        int numeroConta = Integer.parseInt(numeroContaInput);
+
         System.out.print("Tipo da Conta (1 - Corrente, 2 - Poupança): ");
-        int tipo = scanner.nextInt();
+        String tipoContaInput = scanner.nextLine();
+        if (!ehNumero(tipoContaInput)) {
+            System.out.println("Número da conta inválido. Deve conter apenas números.");
+            return;
+        }
+        int tipoInput = scanner.nextInt();
+
         System.out.print("Senha da Conta: ");
-        int senha = scanner.nextInt();
+        String senhaInput = scanner.next();
+        if (!ehNumero(senhaInput)) {
+            System.out.println("Senha inválida. Deve conter apenas números.");
+            return;
+        }
+        int senha = Integer.parseInt(senhaInput);
+
         System.out.print("Saldo inicial: ");
-        double saldo = scanner.nextDouble();
+        String saldoInput = scanner.next();
+        double saldo;
+        try {
+            saldo = Double.parseDouble(saldoInput);
+        } catch (NumberFormatException e) {
+            System.out.println("Saldo inicial inválido. Deve ser um número.");
+            return;
+        }
+
         scanner.nextLine(); // Consumir quebra de linha
 
-        Conta.TipoConta tipoConta = (tipo == 1) ? Conta.TipoConta.CORRENTE : Conta.TipoConta.POUPANCA;
+        Conta.TipoConta tipoConta = (tipoInput == 1) ? Conta.TipoConta.CORRENTE : Conta.TipoConta.POUPANCA;
+        if(tipoInput == 1){
+
+        }
 
         try {
             contaController.criarConta(nome, cliente, agencia, numeroConta, tipoConta, senha, saldo);

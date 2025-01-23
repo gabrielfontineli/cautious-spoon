@@ -2,6 +2,7 @@ package br.ufrn.bti.banco1000.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Classe que representa uma conta bancária no sistema.
@@ -177,5 +178,34 @@ public class Conta {
             this.tipo.name(),
             String.format("%.2f", this.saldo)
         };
+    }
+
+    public static boolean validarNomeConta(String nome) {
+        String nameRegex = "^[a-zA-Z\\s]+$";
+        Pattern pattern = Pattern.compile(nameRegex);
+
+        return nome != null && pattern.matcher(nome).matches();
+    }
+
+    public static boolean validarAgencia(int agencia) {
+        return agencia > 0 && String.valueOf(agencia).length() == 4;
+    }
+
+    public static boolean validarNumeroConta(int numeroConta) {
+        int length = String.valueOf(numeroConta).length();
+
+        return numeroConta > 0 && length >= 6 && length <= 10;
+    }
+
+    public static boolean validarTipoConta(TipoConta tipo) {
+        return tipo != null && (tipo == TipoConta.CORRENTE || tipo == TipoConta.POUPANCA);
+    }
+
+    public static boolean validarSenha(int senha) {
+        return senha > 0 && String.valueOf(senha).length() >= 6;
+    }
+
+    public static boolean validarSaldoInicial(double saldo) {
+        return saldo >= 0;
     }
 }

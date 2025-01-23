@@ -1,9 +1,9 @@
 package br.ufrn.bti.banco1000.controller;
 
-import br.ufrn.bti.banco1000.model.Cliente;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import br.ufrn.bti.banco1000.model.Cliente;
 
 /**
  * Controller para gerenciar operações relacionadas a clientes.
@@ -22,10 +22,20 @@ public class ClienteController {
      * @param cpf CPF do cliente.
      * @param email Email do cliente.
      * @param telefone Telefone do cliente.
+     * @throws IllegalArgumentException
      */
     public void cadastrarCliente(String nome, String cpf, String email, String telefone) {
         if (!Cliente.validarCpf(cpf)) {
             throw new IllegalArgumentException("CPF inválido!");
+        }
+        else if(!Cliente.validarNome(nome)){
+            throw new IllegalArgumentException("Nome inválido!");
+        }
+        else if(!Cliente.validarEmail(email)){
+            throw new IllegalArgumentException("Email  inválido!");
+        }
+        else if(!Cliente.validarTelefone(telefone)){
+            throw new IllegalArgumentException("Telefone inválido!");
         }
         Cliente cliente = new Cliente(nome, cpf, email, telefone);
         clientes.add(cliente);
