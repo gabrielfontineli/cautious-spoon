@@ -25,6 +25,9 @@ public class ClienteController {
      * @throws IllegalArgumentException
      */
     public void cadastrarCliente(String nome, String cpf, String email, String telefone) {
+        if(clienteExiste(cpf)){
+            throw new IllegalArgumentException("Cliente já cadastrado!");
+        }
         if (!Cliente.validarCpf(cpf)) {
             throw new IllegalArgumentException("CPF inválido!");
         }
@@ -61,5 +64,9 @@ public class ClienteController {
      */
     public List<Cliente> listarClientes() {
         return new ArrayList<>(clientes);
+    }
+
+    public boolean clienteExiste(String cpf){
+        return clientes.stream().anyMatch(cliente -> cliente.getCpf().equals(cpf));
     }
 }

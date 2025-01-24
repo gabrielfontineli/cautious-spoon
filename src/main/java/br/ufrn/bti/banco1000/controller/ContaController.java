@@ -30,6 +30,9 @@ public class ContaController {
      * @param saldo Saldo inicial.
      */
     public void criarConta(String nome, Cliente cliente, int agencia, int numeroConta, Conta.TipoConta tipo, int senha, double saldo) {
+        if(contaExiste(agencia, numeroConta)){
+            throw new IllegalArgumentException("Conta com mesma agência e número de conta já existe");
+        }
         if (!Conta.validarNomeConta(nome)) {
             throw new IllegalArgumentException("Nome da conta inválido. Deve conter apenas letras e/ou espaços");
         }
@@ -136,5 +139,9 @@ public class ContaController {
         } catch (IOException e) {
             System.err.println("Erro ao exportar contas para CSV: " + e.getMessage());
         }
+    }
+
+    public boolean contaExiste(int agencia, int numeroConta){
+        return contas.stream().anyMatch(conta -> conta.getAgencia() == agencia && conta.getNumeroConta() == numeroConta);
     }
 }

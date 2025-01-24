@@ -136,7 +136,16 @@ public class BancoGUI {
             System.out.println("Número da conta inválido. Deve conter apenas números.");
             return;
         }
-        int tipoInput = scanner.nextInt();
+        int tipoInput = Integer.parseInt(tipoContaInput);
+        Conta.TipoConta tipoConta;
+        switch (tipoInput) {
+            case 1 -> tipoConta = Conta.TipoConta.CORRENTE;
+            case 2 -> tipoConta = Conta.TipoConta.POUPANCA;
+            default -> {
+                System.out.println("Número da conta inválido. Deve conter apenas números.");
+                return;
+            }
+        }
 
         System.out.print("Senha da Conta: ");
         String senhaInput = scanner.next();
@@ -158,11 +167,6 @@ public class BancoGUI {
 
         scanner.nextLine(); // Consumir quebra de linha
 
-        Conta.TipoConta tipoConta = (tipoInput == 1) ? Conta.TipoConta.CORRENTE : Conta.TipoConta.POUPANCA;
-        if(tipoInput == 1){
-
-        }
-
         try {
             contaController.criarConta(nome, cliente, agencia, numeroConta, tipoConta, senha, saldo);
             System.out.println("Conta criada com sucesso!");
@@ -173,11 +177,26 @@ public class BancoGUI {
 
     private void realizarDeposito(Scanner scanner) {
         System.out.print("Agência: ");
-        int agencia = scanner.nextInt();
+        String agenciaInput = scanner.nextLine();
+        if(ehNumero(agenciaInput)){
+            System.out.println("Número da agência inválido. Deve conter apenas números.");
+            return;
+        }
+        int agencia = Integer.parseInt(agenciaInput);
         System.out.print("Número da Conta: ");
-        int numeroConta = scanner.nextInt();
+        String numeroContaInput = scanner.nextLine();
+        if(ehNumero(numeroContaInput)){
+            System.out.println("Número da conta inválido. Deve conter apenas números.");
+            return;
+        }
+        int numeroConta = Integer.parseInt(numeroContaInput);
         System.out.print("Valor do Depósito: ");
-        double valor = scanner.nextDouble();
+        String valorInput = scanner.nextLine();
+        if(ehNumero(valorInput)){
+            System.out.println("Valor inválido. Deve conter apenas números.");
+            return;
+        }
+        double valor =  Double.parseDouble(valorInput);
         scanner.nextLine(); // Consumir quebra de linha
 
         Conta conta = contaController.buscarConta(agencia, numeroConta);
@@ -197,11 +216,26 @@ public class BancoGUI {
 
     private void realizarSaque(Scanner scanner) {
         System.out.print("Agência: ");
-        int agencia = scanner.nextInt();
+        String agenciaInput = scanner.nextLine();
+        if(ehNumero(agenciaInput)){
+            System.out.println("Número da agência inválido. Deve conter apenas números.");
+            return;
+        }
+        int agencia = Integer.parseInt(agenciaInput);
         System.out.print("Número da Conta: ");
-        int numeroConta = scanner.nextInt();
+        String numContaInput = scanner.nextLine();
+        if(ehNumero(numContaInput)){
+            System.out.println("Número da conta inválido. Deve conter apenas números.");
+            return;
+        }
+        int numeroConta = Integer.parseInt(numContaInput);
         System.out.print("Valor do Saque: ");
-        double valor = scanner.nextDouble();
+        String valorInput = scanner.nextLine();
+        if(ehNumero(valorInput)){
+            System.out.println("Valor inválido. Deve conter apenas números.");
+            return;
+        }
+        double valor = Double.parseDouble(valorInput);
         scanner.nextLine(); // Consumir quebra de linha
 
         Conta conta = contaController.buscarConta(agencia, numeroConta);
@@ -221,15 +255,40 @@ public class BancoGUI {
 
     private void realizarTransferencia(Scanner scanner) {
         System.out.print("Agência da Conta Origem: ");
-        int agenciaOrigem = scanner.nextInt();
+        String agenciaInput = scanner.nextLine();
+        if(ehNumero(agenciaInput)){
+            System.out.println("Número da agência inválido. Deve conter apenas números.");
+            return;
+        }
+        int agenciaOrigem = Integer.parseInt(agenciaInput);
         System.out.print("Número da Conta Origem: ");
-        int numeroContaOrigem = scanner.nextInt();
+        String numContaInput = scanner.nextLine();
+        if(ehNumero(numContaInput)){
+            System.out.println("Número da conta inválido. Deve conter apenas números.");
+            return;
+        }
+        int numeroContaOrigem = Integer.parseInt(numContaInput);
         System.out.print("Agência da Conta Destino: ");
-        int agenciaDestino = scanner.nextInt();
+        String agenciaDestinoInput = scanner.nextLine();
+        if(ehNumero(agenciaDestinoInput)){
+            System.out.println("Número da agência inválido. Deve conter apenas números.");
+            return;
+        }
+        int agenciaDestino = Integer.parseInt(agenciaDestinoInput);
         System.out.print("Número da Conta Destino: ");
-        int numeroContaDestino = scanner.nextInt();
+        String numContaDestino = scanner.nextLine();
+        if(ehNumero(numContaDestino)){
+            System.out.println("Número da conta inválido. Deve conter apenas números.");
+            return;
+        }
+        int numeroContaDestino = Integer.parseInt(numContaDestino);
         System.out.print("Valor da Transferência: ");
-        double valor = scanner.nextDouble();
+        String valorInput = scanner.nextLine();
+        if(ehNumero(valorInput)){
+            System.out.println("Valor inválido. Deve conter apenas números.");
+            return;
+        }
+        double valor = Double.parseDouble(valorInput);
         scanner.nextLine(); // Consumir quebra de linha
 
         Conta contaOrigem = contaController.buscarConta(agenciaOrigem, numeroContaOrigem);
