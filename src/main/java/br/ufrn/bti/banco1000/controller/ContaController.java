@@ -2,12 +2,12 @@ package br.ufrn.bti.banco1000.controller;
 
 import br.ufrn.bti.banco1000.model.Cliente;
 import br.ufrn.bti.banco1000.model.Conta;
+import br.ufrn.bti.banco1000.model.Movimentacao;
+import br.ufrn.bti.banco1000.utils.ExportarCSV;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import br.ufrn.bti.banco1000.utils.ExportarCSV;
 
 /**
  * Controller para gerenciar operações bancárias.
@@ -26,11 +26,15 @@ public class ContaController {
      * @param cliente Cliente associado.
      * @param agencia Número da agência.
      * @param numeroConta Número único da conta.
-     * @param tipo Tipo da conta (CORRENTE ou POUPANCA).
+     * @param tipo Tipo da conta (CORRENTE, POUPANCA ou SALARIO).
      * @param senha Senha da conta.
      * @param saldo Saldo inicial.
      */
     public void criarConta(String nome, Cliente cliente, int agencia, int numeroConta, Conta.TipoConta tipo, int senha, double saldo) {
+        if (buscarConta(agencia, numeroConta) != null) {
+            throw new IllegalArgumentException("Já existe uma conta com este número nesta agência.");
+        }
+
         Conta conta = new Conta(nome, cliente, agencia, numeroConta, tipo, senha, saldo);
         contas.add(conta);
         cliente.adicionarConta(conta);
@@ -61,6 +65,14 @@ public class ContaController {
             throw new IllegalArgumentException("Conta inválida.");
         }
         conta.depositar(valor);
+
+        // Registrar movimentação
+        conta.getMovimentacoes().add(new Movimentacao(
+                Movimentacao.TipoMovimentacao.DEPOSITO,
+                conta.getNumeroConta(),
+                "Depósito realizado",
+                valor
+        ));
     }
 
     /**
@@ -74,6 +86,14 @@ public class ContaController {
             throw new IllegalArgumentException("Conta inválida.");
         }
         conta.sacar(valor);
+
+        // Registrar movimentação
+        conta.getMovimentacoes().add(new Movimentacao(
+                Movimentacao.TipoMovimentacao.SAQUE,
+                conta.getNumeroConta(),
+                "Saque realizado",
+                valor
+        ));
     }
 
     /**
@@ -88,6 +108,21 @@ public class ContaController {
             throw new IllegalArgumentException("Conta de origem ou destino inválida.");
         }
         contaOrigem.transferir(contaDestino, valor);
+
+        // Registrar movimentações
+        contaOrigem.getMovimentacoes().add(new Movimentacao(
+                Movimentacao.TipoMovimentacao.TRANSFERENCIA_ENVIADA,
+                contaOrigem.getNumeroConta(),
+                "Transferência enviada para conta " + contaDestino.getNumeroConta(),
+                valor
+        ));
+
+        contaDestino.getMovimentacoes().add(new Movimentacao(
+                Movimentacao.TipoMovimentacao.TRANSFERENCIA_RECEBIDA,
+                contaDestino.getNumeroConta(),
+                "Transferência recebida da conta " + contaOrigem.getNumeroConta(),
+                valor
+        ));
     }
 
     /**
@@ -99,6 +134,11 @@ public class ContaController {
         return new ArrayList<>(contas);
     }
 
+    /**
+     * Exporta as contas para um arquivo CSV.
+     *
+     * @param filePath Caminho do arquivo CSV.
+     */
     public void exportarContasCsv(String filePath) {
         List<String[]> rows = new ArrayList<>();
 
@@ -108,10 +148,42 @@ public class ContaController {
 
         try {
             ExportarCSV.export(filePath, new String[] {
-                "Agência", "Número Conta", "Nome", "Cliente", "Tipo Conta", "Saldo"
+                "Número Conta", "Nome Cliente", "Agência", "Tipo Conta", "Saldo", "Senha"
             }, rows);
         } catch (IOException e) {
             System.err.println("Erro ao exportar contas para CSV: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Importa contas de um arquivo CSV.
+     *
+     * @param filePath Caminho do arquivo CSV.
+     * @param clientes Lista de clientes disponíveis.
+     */
+    public void importarContasCsv(String filePath, List<Cliente> clientes) {
+        try {
+            List<String[]> rows = ExportarCSV.importar(filePath);
+
+            for (String[] row : rows) {
+                int numeroConta = Integer.parseInt(row[0]);
+                String nomeCliente = row[1];
+                int agencia = Integer.parseInt(row[2]);
+                Conta.TipoConta tipo = Conta.TipoConta.valueOf(row[3]);
+                double saldo = Double.parseDouble(row[4]);
+                int senha = Integer.parseInt(row[5]);
+
+                Cliente cliente = clientes.stream()
+                        .filter(c -> c.getNome().equals(nomeCliente))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + nomeCliente));
+
+                criarConta(nomeCliente, cliente, agencia, numeroConta, tipo, senha, saldo);
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao importar contas de CSV: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Erro ao processar arquivo CSV: " + e.getMessage());
         }
     }
 }

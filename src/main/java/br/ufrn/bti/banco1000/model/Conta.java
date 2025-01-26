@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Classe que representa uma conta bancária no sistema.
- * Suporta operações de depósito, saque e transferência.
+ * Suporta operações de depósito, saque, transferência e registro de movimentações.
  * Cada conta é associada a um cliente.
  */
 public class Conta {
@@ -19,7 +19,7 @@ public class Conta {
     private List<Movimentacao> movimentacoes;
 
     public enum TipoConta {
-        CORRENTE, POUPANCA
+        CORRENTE, POUPANCA, SALARIO
     }
 
     /**
@@ -29,11 +29,15 @@ public class Conta {
      * @param cliente Cliente associado.
      * @param agencia Número da agência.
      * @param numeroConta Número único da conta.
-     * @param tipo Tipo da conta (CORRENTE ou POUPANCA).
+     * @param tipo Tipo da conta (CORRENTE, POUPANCA ou SALARIO).
      * @param senha Senha da conta.
      * @param saldo Saldo inicial.
      */
     public Conta(String nome, Cliente cliente, int agencia, int numeroConta, TipoConta tipo, int senha, double saldo) {
+        if (saldo < 0) {
+            throw new IllegalArgumentException("O saldo inicial não pode ser negativo.");
+        }
+
         this.nome = nome;
         this.cliente = cliente;
         this.agencia = agencia;
@@ -74,6 +78,7 @@ public class Conta {
     }
 
     // Métodos principais
+
     /**
      * Realiza um depósito na conta.
      *
@@ -84,12 +89,7 @@ public class Conta {
             throw new IllegalArgumentException("O valor do depósito deve ser positivo.");
         }
         this.saldo += valor;
-        this.movimentacoes.add(new Movimentacao(
-                Movimentacao.TipoMovimentacao.DEPOSITO, 
-                this.cliente, 
-                "Depósito realizado", 
-                valor
-        ));
+        registrarMovimentacao(Movimentacao.TipoMovimentacao.DEPOSITO, "Depósito realizado", valor);
     }
 
     /**
@@ -105,12 +105,7 @@ public class Conta {
             throw new IllegalStateException("Saldo insuficiente.");
         }
         this.saldo -= valor;
-        this.movimentacoes.add(new Movimentacao(
-                Movimentacao.TipoMovimentacao.SAQUE, 
-                this.cliente, 
-                "Saque realizado", 
-                valor
-        ));
+        registrarMovimentacao(Movimentacao.TipoMovimentacao.SAQUE, "Saque realizado", valor);
     }
 
     /**
@@ -133,20 +128,77 @@ public class Conta {
         this.sacar(valor);
         contaDestino.depositar(valor);
 
-        this.movimentacoes.add(new Movimentacao(
-                Movimentacao.TipoMovimentacao.TRANSFERENCIA_ENVIADA, 
-                this.cliente, 
-                "Transferência enviada para conta " + contaDestino.getNumeroConta(), 
-                valor
-        ));
+        registrarMovimentacao(Movimentacao.TipoMovimentacao.TRANSFERENCIA_ENVIADA,
+                "Transferência enviada para conta " + contaDestino.getNumeroConta(), valor);
 
-        contaDestino.getMovimentacoes().add(new Movimentacao(
-                Movimentacao.TipoMovimentacao.TRANSFERENCIA_RECEBIDA, 
-                contaDestino.getCliente(), 
-                "Transferência recebida da conta " + this.numeroConta, 
-                valor
-        ));
+        contaDestino.registrarMovimentacao(Movimentacao.TipoMovimentacao.TRANSFERENCIA_RECEBIDA,
+                "Transferência recebida da conta " + this.numeroConta, valor);
     }
+
+    /**
+     * Registra uma movimentação associada a esta conta.
+     *
+     * @param tipo Tipo da movimentação.
+     * @param descricao Descrição da movimentação.
+     * @param valor Valor da movimentação.
+     */
+    private void registrarMovimentacao(Movimentacao.TipoMovimentacao tipo, String descricao, double valor) {
+        movimentacoes.add(new Movimentacao(tipo, this.numeroConta, descricao, valor));
+    }
+
+    // Métodos para persistência
+
+    /**
+     * Converte os dados da conta para uma linha no formato CSV.
+     *
+     * @return Array de strings representando os campos da conta.
+     */
+    public String[] toCsvRow() {
+        return new String[]{
+                String.valueOf(this.numeroConta),
+                this.cliente.getNome(),
+                String.valueOf(this.agencia),
+                this.tipo.name(),
+                String.format("%.2f", this.saldo),
+                String.valueOf(this.senha)
+        };
+    }
+
+    /**
+     * Reconstrói uma conta a partir de uma linha CSV.
+     *
+     * @param csv Linha CSV representando uma conta.
+     * @param cliente Cliente associado à conta.
+     * @return Objeto Conta reconstruído.
+     */
+    public static Conta fromCsv(String csv, Cliente cliente) {
+        String[] campos = csv.split(",");
+        if (campos.length < 6) {
+            throw new IllegalArgumentException("Formato CSV inválido.");
+        }
+    
+        int numeroConta = Integer.parseInt(campos[0]);
+        int agencia = Integer.parseInt(campos[2]);
+        TipoConta tipo = TipoConta.valueOf(campos[3]);
+        double saldo = Double.parseDouble(campos[4]);
+        int senha = Integer.parseInt(campos[5]);
+    
+        switch (tipo) {
+            case CORRENTE:
+                double taxaManutencao = Double.parseDouble(campos[6]);
+                return new ContaCorrente(campos[1], cliente, agencia, numeroConta, senha, saldo, taxaManutencao);
+            case POUPANCA:
+                double taxaRendimento = Double.parseDouble(campos[6]);
+                return new ContaPoupanca(campos[1], cliente, agencia, numeroConta, senha, saldo, taxaRendimento);
+            case SALARIO:
+                int limiteSaques = Integer.parseInt(campos[6]);
+                return new ContaSalario(campos[1], cliente, agencia, numeroConta, senha, saldo, limiteSaques);
+            default:
+                throw new IllegalArgumentException("Tipo de conta desconhecido.");
+        }
+    }
+
+    // Métodos auxiliares
 
     @Override
     public boolean equals(Object o) {
@@ -166,16 +218,5 @@ public class Conta {
                 ", tipo=" + tipo +
                 ", saldo=" + saldo +
                 '}';
-    }
-
-    public String[] toCsvRow() {
-        return new String[] {
-            String.valueOf(this.agencia),
-            String.valueOf(this.numeroConta),
-            this.nome,
-            this.cliente.getNome(),
-            this.tipo.name(),
-            String.format("%.2f", this.saldo)
-        };
     }
 }

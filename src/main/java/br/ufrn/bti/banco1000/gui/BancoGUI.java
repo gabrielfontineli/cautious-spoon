@@ -37,19 +37,15 @@ public class BancoGUI {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("=== Banco 1000 ===");
-            System.out.println("1. Cadastrar Cliente");
-            System.out.println("2. Criar Conta");
-            System.out.println("3. Realizar Depósito");
-            System.out.println("4. Realizar Saque");
-            System.out.println("5. Realizar Transferência");
-            System.out.println("6. Listar Clientes");
-            System.out.println("7. Listar Contas");
-            System.out.println("8. Exportar Dados");
-            System.out.println("0. Sair");
+            exibirMenu();
             System.out.print("Escolha uma opção: ");
-            int opcao = scanner.nextInt();
-            scanner.nextLine(); // Consumir quebra de linha
+            int opcao;
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Opção inválida. Digite um número válido.");
+                continue;
+            }
 
             switch (opcao) {
                 case 1 -> cadastrarCliente(scanner);
@@ -59,7 +55,7 @@ public class BancoGUI {
                 case 5 -> realizarTransferencia(scanner);
                 case 6 -> listarClientes();
                 case 7 -> listarContas();
-                case 8 -> exportar();
+                case 8 -> exportarDados();
                 case 0 -> {
                     System.out.println("Encerrando o sistema. Até logo!");
                     return;
@@ -67,6 +63,21 @@ public class BancoGUI {
                 default -> System.out.println("Opção inválida.");
             }
         }
+    }
+
+    private void exibirMenu() {
+        System.out.println("""
+                === Banco 1000 ===
+                1. Cadastrar Cliente
+                2. Criar Conta
+                3. Realizar Depósito
+                4. Realizar Saque
+                5. Realizar Transferência
+                6. Listar Clientes
+                7. Listar Contas
+                8. Exportar Dados
+                0. Sair
+                """);
     }
 
     private void cadastrarCliente(Scanner scanner) {
@@ -97,102 +108,105 @@ public class BancoGUI {
             return;
         }
 
-        System.out.print("Nome da conta: ");
-        String nome = scanner.nextLine();
-        System.out.print("Agência: ");
-        int agencia = scanner.nextInt();
-        System.out.print("Número da Conta: ");
-        int numeroConta = scanner.nextInt();
-        System.out.print("Tipo da Conta (1 - Corrente, 2 - Poupança): ");
-        int tipo = scanner.nextInt();
-        System.out.print("Senha da Conta: ");
-        int senha = scanner.nextInt();
-        System.out.print("Saldo inicial: ");
-        double saldo = scanner.nextDouble();
-        scanner.nextLine(); // Consumir quebra de linha
-
-        Conta.TipoConta tipoConta = (tipo == 1) ? Conta.TipoConta.CORRENTE : Conta.TipoConta.POUPANCA;
-
         try {
+            System.out.print("Nome da conta: ");
+            String nome = scanner.nextLine();
+            System.out.print("Agência: ");
+            int agencia = Integer.parseInt(scanner.nextLine());
+            System.out.print("Número da Conta: ");
+            int numeroConta = Integer.parseInt(scanner.nextLine());
+            System.out.print("Tipo da Conta (1 - Corrente, 2 - Poupança, 3- Salario): ");
+            int tipo = Integer.parseInt(scanner.nextLine());
+            System.out.print("Senha da Conta: ");
+            int senha = Integer.parseInt(scanner.nextLine());
+            System.out.print("Saldo inicial: ");
+            double saldo = Double.parseDouble(scanner.nextLine());
+
+            Conta.TipoConta tipoConta = (tipo == 1) ? Conta.TipoConta.CORRENTE : Conta.TipoConta.POUPANCA;
             contaController.criarConta(nome, cliente, agencia, numeroConta, tipoConta, senha, saldo);
             System.out.println("Conta criada com sucesso!");
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: Digite valores numéricos válidos.");
         } catch (IllegalArgumentException e) {
             System.out.println("Erro: " + e.getMessage());
         }
     }
 
     private void realizarDeposito(Scanner scanner) {
-        System.out.print("Agência: ");
-        int agencia = scanner.nextInt();
-        System.out.print("Número da Conta: ");
-        int numeroConta = scanner.nextInt();
-        System.out.print("Valor do Depósito: ");
-        double valor = scanner.nextDouble();
-        scanner.nextLine(); // Consumir quebra de linha
-
-        Conta conta = contaController.buscarConta(agencia, numeroConta);
-
-        if (conta == null) {
-            System.out.println("Conta não encontrada.");
-            return;
-        }
-
         try {
+            System.out.print("Agência: ");
+            int agencia = Integer.parseInt(scanner.nextLine());
+            System.out.print("Número da Conta: ");
+            int numeroConta = Integer.parseInt(scanner.nextLine());
+            System.out.print("Valor do Depósito: ");
+            double valor = Double.parseDouble(scanner.nextLine());
+
+            Conta conta = contaController.buscarConta(agencia, numeroConta);
+
+            if (conta == null) {
+                System.out.println("Conta não encontrada.");
+                return;
+            }
+
             contaController.depositar(conta, valor);
             System.out.println("Depósito realizado com sucesso!");
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: Digite valores numéricos válidos.");
         } catch (IllegalArgumentException e) {
             System.out.println("Erro: " + e.getMessage());
         }
     }
 
     private void realizarSaque(Scanner scanner) {
-        System.out.print("Agência: ");
-        int agencia = scanner.nextInt();
-        System.out.print("Número da Conta: ");
-        int numeroConta = scanner.nextInt();
-        System.out.print("Valor do Saque: ");
-        double valor = scanner.nextDouble();
-        scanner.nextLine(); // Consumir quebra de linha
-
-        Conta conta = contaController.buscarConta(agencia, numeroConta);
-
-        if (conta == null) {
-            System.out.println("Conta não encontrada.");
-            return;
-        }
-
         try {
+            System.out.print("Agência: ");
+            int agencia = Integer.parseInt(scanner.nextLine());
+            System.out.print("Número da Conta: ");
+            int numeroConta = Integer.parseInt(scanner.nextLine());
+            System.out.print("Valor do Saque: ");
+            double valor = Double.parseDouble(scanner.nextLine());
+
+            Conta conta = contaController.buscarConta(agencia, numeroConta);
+
+            if (conta == null) {
+                System.out.println("Conta não encontrada.");
+                return;
+            }
+
             contaController.sacar(conta, valor);
             System.out.println("Saque realizado com sucesso!");
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: Digite valores numéricos válidos.");
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Erro: " + e.getMessage());
         }
     }
 
     private void realizarTransferencia(Scanner scanner) {
-        System.out.print("Agência da Conta Origem: ");
-        int agenciaOrigem = scanner.nextInt();
-        System.out.print("Número da Conta Origem: ");
-        int numeroContaOrigem = scanner.nextInt();
-        System.out.print("Agência da Conta Destino: ");
-        int agenciaDestino = scanner.nextInt();
-        System.out.print("Número da Conta Destino: ");
-        int numeroContaDestino = scanner.nextInt();
-        System.out.print("Valor da Transferência: ");
-        double valor = scanner.nextDouble();
-        scanner.nextLine(); // Consumir quebra de linha
-
-        Conta contaOrigem = contaController.buscarConta(agenciaOrigem, numeroContaOrigem);
-        Conta contaDestino = contaController.buscarConta(agenciaDestino, numeroContaDestino);
-
-        if (contaOrigem == null || contaDestino == null) {
-            System.out.println("Conta de origem ou destino não encontrada.");
-            return;
-        }
-
         try {
+            System.out.print("Agência da Conta Origem: ");
+            int agenciaOrigem = Integer.parseInt(scanner.nextLine());
+            System.out.print("Número da Conta Origem: ");
+            int numeroContaOrigem = Integer.parseInt(scanner.nextLine());
+            System.out.print("Agência da Conta Destino: ");
+            int agenciaDestino = Integer.parseInt(scanner.nextLine());
+            System.out.print("Número da Conta Destino: ");
+            int numeroContaDestino = Integer.parseInt(scanner.nextLine());
+            System.out.print("Valor da Transferência: ");
+            double valor = Double.parseDouble(scanner.nextLine());
+
+            Conta contaOrigem = contaController.buscarConta(agenciaOrigem, numeroContaOrigem);
+            Conta contaDestino = contaController.buscarConta(agenciaDestino, numeroContaDestino);
+
+            if (contaOrigem == null || contaDestino == null) {
+                System.out.println("Conta de origem ou destino não encontrada.");
+                return;
+            }
+
             contaController.transferir(contaOrigem, contaDestino, valor);
             System.out.println("Transferência realizada com sucesso!");
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: Digite valores numéricos válidos.");
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Erro: " + e.getMessage());
         }
@@ -211,145 +225,20 @@ public class BancoGUI {
                         ", Cliente: " + conta.getCliente().getNome() + ", Saldo: " + conta.getSaldo()));
     }
 
-    private void exportar() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("=== Exportar Dados ===");
-        System.out.println("1. Exportar Clientes");
-        System.out.println("2. Exportar Contas");
-        System.out.println("3. Exportar Movimentações");
-        System.out.print("Escolha uma opção: ");
-        int opcao = scanner.nextInt();
-        scanner.nextLine();
-
+    private void exportarDados() {
         String pastaDestino = "dados_exportados";
         File pasta = new File(pastaDestino);
 
         if (!pasta.exists()) {
-            pasta.mkdir(); 
-        }
-
-        String filePath;
-        switch (opcao) {
-            case 1 -> {
-                List<Cliente> clientes = clienteController.listarClientes();
-
-                if(clientes.isEmpty()){
-                    System.out.println("Não há cliente para exportar");
-                    return;
-                }
-
-                filePath = pastaDestino + File.separator + "clientes.csv";
-                exportarClientes(filePath);
-            }
-            case 2 -> {
-                List<Conta> contas = contaController.listarContas();
-
-                if(contas.isEmpty()){
-                    System.out.println("Não há contas para exportar");
-                    return;
-                }
-
-                filePath = pastaDestino + File.separator + "contas.csv";
-                exportarContas(filePath);
-            }
-            case 3 -> {
-                List<String[]> rows = new ArrayList<>();
-                List<Conta> contas = contaController.listarContas();
-
-                for (Conta conta : contas) {
-                    conta.getMovimentacoes().forEach(movimentacao -> {
-                        rows.add(new String[]{
-                                movimentacao.getTipo().name(),
-                                movimentacao.getDescricao(),
-                                String.valueOf(movimentacao.getValor()),
-                                movimentacao.getData().toString(),
-                                conta.getCliente().getNome(),
-                                String.valueOf(conta.getNumeroConta())
-                        });
-                    });
-                }
-
-                if (rows.isEmpty()) {
-                    System.out.println("Não há movimentações para exportar.");
-                    return;
-                }
-
-                filePath = pastaDestino + File.separator + "movimentacoes.csv";
-                exportarMovimentacoes(filePath);
-            }
-            default -> {
-                System.out.println("Opção inválida.");
-                return;
-            }
-        }
-        System.out.println("Dados exportados com sucesso! Arquivo: " + filePath);
-    }
-
-
-    private void exportarClientes(String filePath) {
-        List<Cliente> clientes = clienteController.listarClientes();
-        List<String[]> rows = new ArrayList<>();
-
-        for (Cliente cliente : clientes) {
-            rows.add(new String[]{cliente.getNome(), cliente.getCpf(), cliente.getEmail(), cliente.getTelefone()});
+            pasta.mkdir();
         }
 
         try {
-            ExportarCSV.export(filePath, new String[]{"Nome", "CPF", "Email", "Telefone"}, rows);
-        } catch (IOException e) {
-            System.out.println("Erro ao exportar clientes: " + e.getMessage());
-        }   
-    }
-
-    private void exportarContas(String filePath) {
-        List<Conta> contas = contaController.listarContas();
-        List<String[]> rows = new ArrayList<>();
-    
-        for (Conta conta : contas) {
-            rows.add(new String[]{
-                String.valueOf(conta.getAgencia()),
-                String.valueOf(conta.getNumeroConta()),
-                conta.getNome(),
-                conta.getCliente().getNome(),
-                conta.getTipo().name(),
-                String.format("%.2f", conta.getSaldo())
-            });
-        }
-    
-        try {
-            ExportarCSV.export(filePath, new String[]{"Agência", "Número Conta", "Nome", "Cliente", "Tipo Conta", "Saldo"}, rows);
-        } catch (IOException e) {
-            System.out.println("Erro ao exportar contas: " + e.getMessage());
+            clienteController.exportarClientesCsv(pastaDestino + File.separator + "clientes.csv");
+            contaController.exportarContasCsv(pastaDestino + File.separator + "contas.csv");
+            System.out.println("Dados exportados com sucesso! Arquivos salvos em: " + pastaDestino);
+        } catch (Exception e) {
+            System.out.println("Erro ao exportar dados: " + e.getMessage());
         }
     }
-
-    private void exportarMovimentacoes(String filePath) {
-
-        List<String[]> rows = new ArrayList<>();
-        
-        List<Conta> contas = contaController.listarContas();
-        for (Conta conta : contas) {
-
-            conta.getMovimentacoes().forEach(movimentacao -> {
-                rows.add(new String[]{
-                    movimentacao.getTipo().name(),
-                    movimentacao.getDescricao(),                 
-                    String.valueOf(movimentacao.getValor()),     
-                    movimentacao.getData().toString(),          
-                    conta.getCliente().getNome(),               
-                    String.valueOf(conta.getNumeroConta())      
-                });
-            });
-        }
-    
-        String[] headers = {"Tipo", "Descrição", "Valor", "Data", "Cliente", "Conta"};
-    
-        try {
-            ExportarCSV.export(filePath, headers, rows);
-            System.out.println("Movimentações exportadas com sucesso! Arquivo: " + filePath);
-        } catch (IOException e) {
-            System.out.println("Erro ao exportar movimentações: " + e.getMessage());
-        }
-    }
-    
 }
